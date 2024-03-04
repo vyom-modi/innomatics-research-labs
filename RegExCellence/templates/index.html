@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RegExCellence</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        /* Additional CSS styles specific to the index page */
+        .result-container {
+            margin-top: 20px;
+            display: none; /* Hide the result container initially */
+        }
+
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .result-table th,
+        .result-table td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .result-table th {
+            background-color: #5cb85c; /* Light green for table header */
+            color: #fff;
+        }
+
+        /* Highlight style for matched portions */
+        .matched {
+            /* background-color: lightcoral; */
+            color: rgb(37, 178, 32);
+        }
+
+        #ttl {
+            color: #004B49;
+            text-align: center;
+        }
+
+        .email-link {
+            color: #4A5D23;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="ttl">RegExCellence</h1>
+        <!-- <hr width="60%"> -->
+        <form id="regexForm" action="/" method="post">
+            <label for="email">Test String:</label>
+            <input type="text" id="test_string" name="test_string" required><br><br>
+            <label for="regex">Regex Pattern:</label>
+            <input type="text" id="regex" name="regex" required><br><br>
+            <input type="submit" value="Match">
+        </form>
+        
+        <div class="result-container">
+            <h2>Match Result</h2>
+            <p id="originalInput">Original Input: <strong></strong></p>
+            <table class="result-table">
+                <thead>
+                    <tr>
+                        <th>Matched Portion</th>
+                    </tr>
+                </thead>
+                <tbody id="matchedPortions">
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="email-link">
+        Got an email to validate? Let's put it to the test! Check out our email validation tool 
+        <a href="/validate_email" style="color: #4A5D23">here</a>.
+    </div>
+    <script>
+        // Wait for the DOM content to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Attach event listener to the form element
+            document.getElementById('regexForm').addEventListener('submit', function(event) {
+                // Prevent the form from submitting
+                event.preventDefault();
+                
+                // Get the form data
+                var testString = document.getElementById('test_string').value;
+                var regexPattern = document.getElementById('regex').value;
+                
+                // Perform regex search
+                var matches = testString.match(new RegExp(regexPattern, 'g'));
+                
+                // Display the original input with matched portions highlighted
+                var originalInput = document.querySelector('#originalInput strong');
+                originalInput.textContent = ''; // Clear previous contents
+                var index = 0;
+                matches.forEach(function(match) {
+                    var indexOfMatch = testString.indexOf(match, index);
+                    // Append non-matched portion before the current match
+                    if (indexOfMatch > index) {
+                        var nonMatchedText = document.createTextNode(testString.substring(index, indexOfMatch));
+                        originalInput.appendChild(nonMatchedText);
+                    }
+                    // Append matched portion with highlighting
+                    var matchedSpan = document.createElement('span');
+                    matchedSpan.classList.add('matched');
+                    matchedSpan.textContent = match;
+                    originalInput.appendChild(matchedSpan);
+                    index = indexOfMatch + match.length; // Update index to the end of the current match
+                });
+                // Append non-matched portion after the last match
+                if (index < testString.length) {
+                    var nonMatchedText = document.createTextNode(testString.substring(index));
+                    originalInput.appendChild(nonMatchedText);
+                }
+                
+                // Display the matched portions in the table
+                var matchedPortions = document.getElementById('matchedPortions');
+                matchedPortions.innerHTML = ''; // Clear previous contents
+                matches.forEach(function(match) {
+                    var row = document.createElement('tr');
+                    var cell = document.createElement('td');
+                    cell.textContent = match;
+                    row.appendChild(cell);
+                    matchedPortions.appendChild(row);
+                });
+                
+                // Show the result container
+                document.querySelector('.result-container').style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>
